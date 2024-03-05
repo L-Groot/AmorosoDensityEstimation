@@ -4,6 +4,19 @@
 
 ######################
 
+# Amoroso density function
+
+# Negative Log Likelihood Function for Amoroso
+
+# BIC function
+
+# Amoroso estimation function
+# --> MLE and MDE
+# --> BIC
+# --> Plots
+
+#----------------------
+
 library(AmoRosoDistrib)
 library(palmerpenguins)
 library(tidyverse)
