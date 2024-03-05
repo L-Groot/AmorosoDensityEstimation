@@ -7,7 +7,7 @@
 # dAmoroso()
 # --> Amoroso density function
 
-# likelihood_Amoroso()
+# LL_Amoroso()
 # --> Likelihood Function for Amoroso
 
 # BIC_Amoroso()
