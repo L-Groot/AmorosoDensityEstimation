@@ -4,16 +4,19 @@
 
 ######################
 
-# Amoroso density function
+# dAmoroso()
+# --> Amoroso density function
 
-# Negative Log Likelihood Function for Amoroso
+# likelihood_Amoroso()
+# --> Likelihood Function for Amoroso
 
-# BIC function
+# BIC_Amoroso()
+# --> Calculates the BIC for a given set of Amoroso parameters and data
 
-# Amoroso estimation function
-# --> MLE and MDE
-# --> BIC
-# --> Plots
+# estimateAmoroso_MLE_MDE()
+# --> Estimates the Amoroso to certain data vector using MLE and MDE methods
+# --> Returns a dataframe with parameter estimates and BIC for all fits
+# --> Plots Amoroso fits on histogram and together with R Kernel density estimate
 
 #----------------------
 
@@ -54,29 +57,45 @@ dAmoroso <- function(x, a, lambda, c, mu) {
   return(c1*c2*c3*c4)
 }
 
-#---------------------------------------------------------------------
-# Define the negative log-likelihood function for Amoroso distribution
-#---------------------------------------------------------------------
-negLogLik <- function(params, data) {
+#--------------------------------------------------------
+# Define log-likelihood function for Amoroso distribution
+#--------------------------------------------------------
+LL_Amoroso <- function(data, a, lambda, c, mu) {
+  # Calculate the log-likelihood for each data point
+  log_likelihood_values <- log(dAmoroso(data, a, lambda, c, mu))
+  
+  # Sum the log-likelihood values
+  log_likelihood <- sum(log_likelihood_values)
+  
+  return(log_likelihood)
+}
+
+
+#--------------------------------
+# Define BIC function for Amoroso
+#--------------------------------
+BIC_Amoroso <- function(data, params) {
+  # Extract parameters
   a <- params[1]
   lambda <- params[2]
   c <- params[3]
   mu <- params[4]
   
-  sum(-log(dAmoroso(data, a, lambda, c, mu)))
+  # Calculate log-likelihood
+  log_likelihood <- likelihood_Amoroso(data, a, lambda, c, mu)
+  
+  # Number of parameters in the model
+  num_params <- length(params)
+  
+  # Number of data points
+  n <- length(data)
+  
+  # Calculate BIC
+  bic <- -2 * log_likelihood + num_params * log(n)
+  
+  return(bic)
 }
 
-#--------------------
-# Define BIC function
-#--------------------
-# --> calculates BIC for a certain Amoroso distribution fit to a certain data
-get_BIC <- function(data, params) {
-  N <- length(data)
-  P <- length(params)
-  LL <- -negLogLik(params, data)
-  BIC <- LL + log(N) * (P + 1)
-  return(BIC)
-}
 
 #-------------------------------------------------------------------
 # Define short info texts about plots for estimate_amoroso_MLE_MDE()
@@ -99,7 +118,7 @@ grid_plots_info <- "\nABOUT THE PLOTS:\n
 #-----------------------------------------------------------------
 # Define function to fit Amoroso with MLE and MDE and plot results
 #-----------------------------------------------------------------
-estAmoroso_MLE_MDE <- function(vec=NULL,
+estimateAmoroso_MLE_MDE <- function(vec=NULL,
                                dataframe=NULL, variable=NULL,
                                plotpermethod = FALSE,
                                breaks=20,
@@ -218,7 +237,7 @@ estAmoroso_MLE_MDE <- function(vec=NULL,
   df <- df %>%
     rowwise() %>%
     # Calculate BIC for each method and parameter space
-    mutate(BIC = get_BIC(data = y, params = c(a, l, c, mu))) %>%
+    mutate(BIC = BIC_Amoroso(data = y, params = c(a, l, c, mu))) %>%
     ungroup() %>%
     # Per method, identify better parameter space set (+ or -)
     group_by(method) %>%
@@ -443,10 +462,10 @@ estAmoroso_MLE_MDE <- function(vec=NULL,
 #-------------------
 # Test the function
 #-------------------
-#estAmoroso_MLE_MDE(dataframe = palmerpenguins::penguins, variable = "bill_length_mm")
-#estAmoroso_MLE_MDE(dataframe = palmerpenguins::penguins, variable = "bill_length_mm",)
-#estAmoroso_MLE_MDE(vec = penguins$flipper_length_mm)
-#estAmoroso_MLE_MDE(vec = penguins$bill_depth_mm, varname = "Penguin Bill Depth", plotpermethod =  F)
+#estimateAmoroso_MLE_MDE(dataframe = palmerpenguins::penguins, variable = "bill_length_mm")
+#estimateAmoroso_MLE_MDE(dataframe = palmerpenguins::penguins, variable = "bill_length_mm",)
+#estimateAmoroso_MLE_MDE(vec = penguins$flipper_length_mm)
+#estimateAmoroso_MLE_MDE(vec = penguins$bill_depth_mm, varname = "Penguin Bill Depth", plotpermethod =  F)
 
 #-------------------
 # Save the function
