@@ -49,6 +49,11 @@ library(gridExtra)
 #--------------------------------------------
 # Define Amoroso probability density function
 #--------------------------------------------
+# a: scale
+# lambda: shape
+# c: shape
+# mu: location
+
 dAmoroso <- function(x, a, lambda, c, mu) {
   c1 <- 1/(gamma(lambda))
   c2 <- abs(c/a)
@@ -82,7 +87,7 @@ BIC_Amoroso <- function(data, params) {
   mu <- params[4]
   
   # Calculate log-likelihood
-  log_likelihood <- likelihood_Amoroso(data, a, lambda, c, mu)
+  log_likelihood <- LL_Amoroso(data, a, lambda, c, mu)
   
   # Number of parameters in the model
   num_params <- length(params)
