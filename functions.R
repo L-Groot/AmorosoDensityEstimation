@@ -76,6 +76,7 @@ LL_Amoroso <- function(data, a, lambda, c, mu) {
 }
 
 
+
 #--------------------------------
 # Define BIC function for Amoroso
 #--------------------------------
