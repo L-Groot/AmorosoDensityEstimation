@@ -120,10 +120,11 @@ BIC_Amoroso <- function(data, params) {
 # Define short info texts about plots for estimate_amoroso_MLE_MDE()
 #-------------------------------------------------------------------
 one_plot_info <- "\nABOUT THE PLOT:\n
-  The plot contains the histogram of the variable (grey bars),
-  the nonparametric R Kernel density estimator fit (dark grey line) and the
-  Amoroso fits from the initial parameter estimation (as describes by Combes
-  et al. (2022). Each coloured line corresponds to one Amoroso fit per method.
+  The plot shows the histogram of the variable (grey bars). Overlayed is the
+  nonparametric R Kernel density estimator fit (thin grey line). The thick black
+  and grey lines are the Amoroso fits from the initial parameter estimation
+  (as describes by Combes et al. (2022). The colorful thick lines each correspond
+  to an Amoroso fit resulting from a different method (MLE and MDE).
   Since each method has two sets of parameter estimates (+ve and -ve space), the
   plot shows only the one that fits the data better according to the BIC. For
   some methods this may be the parameter set in negative space and for other
