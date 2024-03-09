@@ -46,28 +46,41 @@ library(gridExtra)
 #-----------------------------------------------
 
 
-#--------------------------------------------
-# Define Amoroso probability density function
-#--------------------------------------------
+#--------------------
+# Define Amoroso PDF
+#--------------------
+# --> based on Combes et al. (2022)
 # a: scale
-# lambda: shape
+# l: shape
 # c: shape
 # mu: location
 
-dAmoroso <- function(x, a, lambda, c, mu) {
-  c1 <- 1/(gamma(lambda))
+dAmoroso <- function(x, a, l, c, mu) {
+  c1 <- 1/(gamma(l))
   c2 <- abs(c/a)
-  c3 <- ((x-mu)/a)^(lambda*c-1)
+  c3 <- ((x-mu)/a)^(l*c-1)
   c4 <- exp(-((x-mu)/a)^c)
   return(c1*c2*c3*c4)
 }
 
+
+#--------------------
+# Define Amoroso CDF
+#--------------------
+# --> based on Combes et al. (2022)
+cAmoroso <- function(x, a, l, c, mu) {
+  c1 <- pgamma(l,((x-mu)/a),lower.tail = TRUE)
+  c2 <- gamma(l)
+  return(c1/c2)
+}
+
+
 #--------------------------------------------------------
 # Define log-likelihood function for Amoroso distribution
 #--------------------------------------------------------
-LL_Amoroso <- function(data, a, lambda, c, mu) {
+LL_Amoroso <- function(data, a, l, c, mu) {
   # Calculate the log-likelihood for each data point
-  log_likelihood_values <- log(dAmoroso(data, a, lambda, c, mu))
+  log_likelihood_values <- log(dAmoroso(data, a, l, c, mu))
   
   # Sum the log-likelihood values
   log_likelihood <- sum(log_likelihood_values)
@@ -83,12 +96,12 @@ LL_Amoroso <- function(data, a, lambda, c, mu) {
 BIC_Amoroso <- function(data, params) {
   # Extract parameters
   a <- params[1]
-  lambda <- params[2]
+  l <- params[2]
   c <- params[3]
   mu <- params[4]
   
   # Calculate log-likelihood
-  log_likelihood <- LL_Amoroso(data, a, lambda, c, mu)
+  log_likelihood <- LL_Amoroso(data, a, l, c, mu)
   
   # Number of parameters in the model
   num_params <- length(params)
@@ -120,6 +133,7 @@ grid_plots_info <- "\nABOUT THE PLOTS:\n
   the parameter estimates in positive space (green line) and the fit from the
   parameter estimates in negative space (red line). The dark-grey line is the
   fit of the nonparametric R Kernel density.\n"
+
 
 #-----------------------------------------------------------------
 # Define function to fit Amoroso with MLE and MDE and plot results

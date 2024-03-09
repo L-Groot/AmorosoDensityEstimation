@@ -1,0 +1,173 @@
+---
+title: "TestingThings"
+author: "Laura Groot"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this RMarkdown I document my workflow.
+I imagine this as a series of questions, where one naturally leads to the next.
+
+```{r, message=FALSE}
+library(VGAM)
+library(AmoRosoDistrib)
+library(devtools)
+
+# Load my functions
+source_url("https://raw.githubusercontent.com/L-Groot/AmorosoDensityEstimation/main/functions.R")
+```
+
+
+### (1) Amoroso = Stacy
+
+Amoroso = Stacy when mu = 0.
+
+The Stacy distribution (or 3-parameter generalized gamma) is just the Amoroso without
+the location parameter mu. So the difference between them is that the Amoroso has
+an extra location parameter that shifts the distribution along the x axis.
+
+```{r}
+# PDF for 3-par GG
+dggamma <- function(t, theta, kappa, delta, log = FALSE){
+  val <- log(delta) - kappa*log(theta) - lgamma(kappa/delta) + (kappa - 1)*log(t) -
+  (t/theta)^delta
+  if(log) return(val) else return(exp(val))
+}
+
+# Quantile Function for 3-par GG
+qggamma <- function(p, theta, kappa, delta){
+  out <- qgamma(p, shape = kappa/delta, scale = theta^delta)^(1/delta)
+  return(out)
+}
+
+# Split plotting window in 2
+par(mfrow = c(1,2))
+
+# Set x range
+x <- seq(3, 20, by = 0.01)
+
+# Set parameters for 3GG
+scale <- 4
+shape1 <- 2
+shape2 <- 2
+
+# Stacy
+plot(x, dgengamma.stacy(x, scale = scale, d = shape1, k = shape2), type = "l",
+     col = "purple", ylim = 0:1,
+     main = paste0("Stacy(scale=",scale," ,d=",shape1," ,k=",shape2,")"),
+     las = 1, ylab = "", lwd = 2)
+
+# Amoroso with same parameters and mu = 0
+plot(x, dAmoroso(x, a = scale, l = shape2, c = shape1, mu = 0), type = "l",
+     col = "magenta", ylim = 0:1,
+     main = paste0("Amoroso(a=",scale,", l=",shape2,", c=",shape1, ", mu=0)"),
+     las = 1, ylab = "", lwd = 2)
+# --> this also works with dgg4() instead of dAmoroso()!
+```
+
+
+
+### (2) Amoroso = Gamma
+
+Amoroso is Gamma when c = 1 and mu = 0.
+
+```{r}
+# Split plotting window in 2
+par(mfrow = c(1,2))
+
+# Set parameters
+scale = 2
+shape = 3
+
+# Define x
+x <- seq(3, 20, by = 0.01)
+
+# Gamma
+plot(x, dgamma(x, shape = shape, scale = scale), type = "l",
+     col = "lightseagreen", ylim = 0:1,
+     main = paste0("Gamma(shape=",shape," ,scale=",scale,")"),
+     las = 1, ylab = "", lwd = 2)
+
+# Amoroso
+plot(x, dAmoroso(x, a = scale, l = shape, c = 1, mu = 0), type = "l",
+     col = "magenta", ylim = 0:1,
+     main = paste0("Amoroso(a=",scale,", l=",shape2,", c=",shape1, ", mu=0)"),
+     las = 1, ylab = "", lwd = 2)
+
+```
+
+
+### (3) Amoroso = Weibull
+
+Amoroso is Weibull when l = c = 1.
+
+```{r}
+# Split plotting window in 2
+par(mfrow = c(1,3))
+
+# Set parameters
+scale = 3
+shape = 1
+
+# Define x
+x <- seq(3, 20, by = 0.01)
+
+# Weibull
+plot(x, dweibull(x, shape = shape, scale = scale), type = "l",
+     col = "lightblue", ylim = 0:1,
+     main = paste0("Weibull(shape=",shape," ,scale=",scale,")"),
+     las = 1, ylab = "", lwd = 2)
+
+# Stacy
+plot(x, dgengamma.stacy(x, scale = scale, d = shape, k = shape), type = "l",
+     col = "purple", ylim = 0:1,
+     main = paste0("Stacy(scale=",scale," ,d=",shape," ,k=",shape,")"),
+     las = 1, ylab = "", lwd = 2)
+
+# Amoroso
+plot(x, dAmoroso(x, a = scale, l = shape, c = shape, mu = 0), type = "l",
+     col = "magenta", ylim = 0:1,
+     main = paste0("Amoroso(a=",scale,", l=",shape,", c=",shape, ", mu=0)"),
+     las = 1, ylab = "", lwd = 2)
+
+```
+
+
+
+
+### Does the MLE method always have higher likelihood than MDE methods?
+
+Theoretically MLE promises that it finds the set of parameters that maximises
+the likelihood. Since all Amoroso fits have the same number of parameters (4),
+they all get the same punishment term in the BIC formula. Therefore, if we compare
+Amoroso fits to each other, the model with the lowest BIC must have the highest
+likelihood. Theoretically, the MLE method should always results in the lowest BIC.
+Here, I investigate if this is indeed the case; Does the MLE Amoroso fit indeed always
+have a lower BIC than all the MDE methods?
+
+```{r}
+# Check out existing datasets
+#data()
+
+# Estimate Amoroso with MLE and MDE methods on different variables
+# estimateAmoroso_MLE_MDE(airquality$Temp) #lowest BIC: MLE+
+# estimateAmoroso_MLE_MDE(airquality$Wind) #lowest BIC: MLE-
+# estimateAmoroso_MLE_MDE(faithful$eruptions) #lowest BIC: MLE+
+# # --> bad fit of Amoroso because data is bimodal
+# estimateAmoroso_MLE_MDE(faithful$waiting) #lowest BIC: MLE+
+# estimateAmoroso_MLE_MDE(diamonds$carat) #lowest BIC: MLE-
+# estimateAmoroso_MLE_MDE(diamonds$price) #lowest BIC: MLE+
+
+# --> fitting Amoroso to diamonds takes much longer because it has many observations
+
+length(Nile) # n = 100
+nrow(diamonds) # n = 53940
+nrow(airquality) # n = 153
+
+```
+
+
